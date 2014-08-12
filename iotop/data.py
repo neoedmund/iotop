@@ -175,8 +175,9 @@ class TaskStatsNetlink(object):
 def find_uids(options):
     """Build options.uids from options.users by resolving usernames to UIDs"""
     options.uids = []
+    if not options.users:return None
     error = False
-    for u in options.users or []:
+    for u in options.users.split('/'):
         try:
             uid = int(u)
         except ValueError:
@@ -192,6 +193,38 @@ def find_uids(options):
     if error:
         sys.exit(1)
 
+def find_pids(options):
+
+    def toPid(p_name):
+        pids=[]
+        ROOT="/proc/"
+        dir_list=os.listdir(ROOT)
+        for name in dir_list:
+            if (not name.isdigit()) or os.path.isdir(name):
+                continue
+            fd=open(os.path.join(ROOT,name,'status'),'r')
+            Name=fd.readline().split(':',1)[1].strip()
+            fd.close()
+            if Name.strip()==p_name:
+                pids.append(int(name))
+        if not pids:
+            pids=[0]
+        
+        return pids
+
+    pids=[]
+    if not options.pids:
+        options.pids=[]
+        return None
+
+    for process in options.pids.split(','):
+        try:
+            pid=int(process)
+            pids.append(pid)
+        except ValueError:
+            pids[:]=pids+toPid(process)
+
+    options.pids=pids
 
 def parse_proc_pid_status(pid):
     result_dict = {}
@@ -277,6 +310,7 @@ class ProcessInfo(DumpableObject):
             self.user = None
             self.uid = uid
         return uid
+
 
     def get_user(self):
         uid = self.get_uid()

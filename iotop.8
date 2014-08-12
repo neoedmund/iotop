@@ -51,10 +51,14 @@ This is most useful in non\-interactive mode.
 Set the delay between iterations in seconds (1 second by default).
 Accepts non-integer values such as 1.1 seconds.
 .TP
-\fB\-p\fR PID, \fB\-\-pid\fR=\fIPID\fR
+\fB\-p\fR PID|PNAME, \fB\-\-pid\fR=\fIPID|PNAME\fR
+If there are multiple parameters by commas.\fR
+If you need to monitor nultiple users,you can use / to separate each user\fR
+for example:-p python,chrome,2258.\fR
 A list of processes/threads to monitor (all by default).
 .TP
 \fB\-u\fR USER, \fB\-\-user\fR=\fIUSER\fR
+for example:-u www-data/mysqld.\fR
 A list of users to monitor (all by default)
 .TP
 \fB\-P\fR, \fB\-\-processes\fR

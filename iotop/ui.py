@@ -30,7 +30,7 @@ import signal
 import sys
 import time
 
-from iotop.data import find_uids, TaskStatsNetlink, ProcessList, Stats
+from iotop.data import find_uids, TaskStatsNetlink, ProcessList, Stats,find_pids
 from iotop.data import ThreadInfo
 from iotop.version import VERSION
 from iotop import ioprio
@@ -611,10 +611,15 @@ def main():
     parser.add_option('-d', '--delay', type='float', dest='delay_seconds',
                       help='delay between iterations [1 second]',
                       metavar='SEC', default=1)
-    parser.add_option('-p', '--pid', type='int', dest='pids', action='append',
-                      help='processes/threads to monitor [all]', metavar='PID')
+    parser.add_option('-p', '--pid', type='str', dest='pids', 
+                      help='processes/threads to monitor [all]\n\
+                              for example:-p python,chrome,2258', metavar='PID|PNAME')
     parser.add_option('-u', '--user', type='str', dest='users',
-                      action='append', help='users to monitor [all]',
+                       help='users to monitor [all]\n\
+                               if you need to monitor multiple users,you can\
+                                use / to separate each user\
+                                for example:-u root/mysql/500',default="",
+                     # action='append', help='users to monitor [all]',
                       metavar='USER')
     parser.add_option('-P', '--processes', action='store_true',
                       dest='processes', default=False,
@@ -636,7 +641,7 @@ def main():
     if args:
         parser.error('Unexpected arguments: ' + ' '.join(args))
     find_uids(options)
-    options.pids = options.pids or []
+    find_pids(options)
     options.batch = options.batch or options.time or options.quiet
 
     main_loop = lambda: run_iotop(options)
