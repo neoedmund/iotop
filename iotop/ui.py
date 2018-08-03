@@ -52,7 +52,7 @@ def human_size(size):
     else:
         return '0.00 B'
 
-    expo = int(math.log(size / 2, 2) / 10)
+    expo = int(math.log(size, 2) / 10)
     return '%s%.2f %s' % (
         sign, (float(size) / (1 << (10 * expo))), UNITS[expo])
 
@@ -403,6 +403,9 @@ class IOTopUI(object):
         def format(p):
             stats = format_stats(self.options, p, self.process_list.duration)
             io_delay, swapin_delay, read_bytes, write_bytes = stats
+
+            if read_bytes.startswith("0.00") and write_bytes.startswith("0.00"): return ""
+
             if Stats.has_blkio_delay_total:
                 delay_stats = '%7s %7s ' % (swapin_delay, io_delay)
             else:
@@ -438,7 +441,7 @@ class IOTopUI(object):
                        reverse=self.sorting_reverse)
         if not self.options.batch:
             del processes[self.height - 2:]
-        return list(map(format, processes))
+        return list(filter(lambda x:x != "", map(format, processes)))
 
     def refresh_display(self, first_time, total, current, duration):
         summary = [
@@ -611,7 +614,7 @@ def main():
     parser.add_option('-d', '--delay', type='float', dest='delay_seconds',
                       help='delay between iterations [1 second]',
                       metavar='SEC', default=1)
-    parser.add_option('-p', '--pid', type='str', dest='pids', 
+    parser.add_option('-p', '--pid', type='str', dest='pids',
                       help='processes/threads to monitor [all]\n\
                               for example:-p python,chrome,2258', metavar='PID|PNAME')
     parser.add_option('-u', '--user', type='str', dest='users',
